@@ -1,0 +1,83 @@
+/// A data format common to Rust and Kotlin (Java).
+/// It is sent from Rust to Kotlin (Java) in JSON format.
+
+use alvr_session::CodecType;
+use serde::Serialize;
+use std::net::IpAddr;
+
+#[derive(Debug, Serialize, PartialEq)]
+#[serde(tag = "type")]
+pub enum AlvrCodec {
+    H264,
+    H265,
+    Unknown,
+}
+
+impl From<u32> for AlvrCodec {
+    fn from(n: u32) -> AlvrCodec {
+        match n {
+            0 => AlvrCodec::H264,
+            1 => AlvrCodec::H265,
+            _ => AlvrCodec::Unknown
+        }
+    }
+}
+
+impl From<CodecType> for AlvrCodec {
+    fn from(t: CodecType) -> AlvrCodec {
+        match t {
+            CodecType::H264 => AlvrCodec::H264,
+            CodecType::Hevc => AlvrCodec::H265,
+            CodecType::AV1 => AlvrCodec::Unknown,
+        }
+    }
+}
+
+#[derive(Debug, Serialize)]
+#[serde(tag = "type")]
+pub enum ConnectionEvent {
+    Initial,
+    ServerFound { ipaddr: IpAddr },
+    Connected { settings: ConnectionSettings },
+    StreamStart,
+    ServerRestart,
+    Error { error: ConnectionError },
+}
+
+#[derive(Debug, Serialize)]
+pub struct ConnectionSettings {
+    pub fps: f32,
+    pub codec: AlvrCodec,
+    pub realtime: bool,
+    pub dashboard_url: String,
+    pub ffr_param: Option<FfrParam>,
+}
+
+#[derive(Debug, Serialize)]
+pub struct FfrParam {
+    pub eye_width: i32,
+    pub eye_height: i32,
+    pub center_size_x: f32,
+    pub center_size_y: f32,
+    pub center_shift_x: f32,
+    pub center_shift_y: f32,
+    pub edge_ratio_x: f32,
+    pub edge_ratio_y: f32,
+}
+
+#[derive(Debug, Serialize, Clone)]
+#[serde(tag = "type")]
+pub enum ConnectionError {
+    NetworkUnreachable,
+    ClientUntrusted,
+    IncompatibleVersions,
+    TimeoutSetUpStream,
+    ServerDisconnected { cause: String },
+    SystemError { cause: String },
+}
+
+impl From<String> for ConnectionError {
+    fn from(cause: String) -> ConnectionError {
+        ConnectionError::SystemError { cause }
+    }
+}

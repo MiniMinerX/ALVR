@@ -24,6 +24,7 @@ alvr_server_io = { path = "alvr/server_io" }
 alvr_session = { path = "alvr/session" }
 alvr_sockets = { path = "alvr/sockets" }
 alvr_system_info = { path = "alvr/system_info" }
+alvr_android_lib_no_ovr = { path = "alvr/android_lib_no_ovr" }
 
 [profile.release]
 debug = "limited"
