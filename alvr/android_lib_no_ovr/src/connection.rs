@@ -2,7 +2,7 @@ use crate::{
     audio, buffer_queue, common::{
         ConnectionError, ConnectionEvent, ConnectionSettings,
         FfrParam,
-    }, device::{self, Device}, latency_controller, legacy_packets::*, legacy_stream::StreamHandler, packet, trace_err, trace_str, util
+    }, device::{self, Device}, latency_controller, legacy_packets::*, legacy_stream::StreamHandler, packet, trace_err, trace_str, util::{self, StrResult}
 };
 use alvr_common::{
     glam::{Quat, Vec2, Vec3},
@@ -12,7 +12,7 @@ use alvr_session::*;
 use alvr_sockets::*;
 use bincode;
 use futures::future::BoxFuture;
-use log::{info, warn};
+use log::{debug, info, warn};
 use once_cell::sync::Lazy;
 use parking_lot::Mutex;
 use serde_json as json;

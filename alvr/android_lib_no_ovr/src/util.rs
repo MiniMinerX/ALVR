@@ -1,11 +1,17 @@
 use std::time::SystemTime;
 
+
+pub type StrResult<T = ()> = Result<T, String>;
+
+
+
 /// Execute the $b with the return value $t, call 'show_err' and return Option<$t>.
 /// The default of $t is ().
 #[macro_export]
 macro_rules! catch_err {
     ($b:block,$t:ty) => {{
-        let s = || -> StrResult<$t> {
+        use alvr_common::show_err;
+        let s = || -> $crate::util::StrResult<$t> {
             Ok($b)
         };
         show_err(s())

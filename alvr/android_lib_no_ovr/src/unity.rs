@@ -1,6 +1,6 @@
 use crate::{
     catch_err,
-    device::{self, Device, DeviceAdapter, Tracking},
+    device::{self, Device, DeviceAdapter, Tracking}, trace_err, util::StrResult,
 };
 use jni::{
     JavaVM, JNIEnv,
@@ -22,7 +22,7 @@ struct UnityPlugin {
 
 impl UnityPlugin {
     fn init_context(&self) {
-        let env = self.vm.attach_current_thread().unwrap();
+        let mut env = self.vm.attach_current_thread().unwrap();
         env.call_method(&self.object, "initContext", "()V", &[]).unwrap();
     }
 }

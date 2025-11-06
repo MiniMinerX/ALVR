@@ -2,7 +2,7 @@ use crate::{
     legacy_packets::TimeSync,
     util,
 };
-use log::{debug, warn};
+use log::{debug, error, warn};
 //use alvr_common::prelude::*;
 use once_cell::sync::Lazy;
 use parking_lot::Mutex;

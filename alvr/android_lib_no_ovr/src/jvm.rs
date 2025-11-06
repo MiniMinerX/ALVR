@@ -2,9 +2,9 @@ use crate::{
     common::ConnectionEvent,
     connection::ConnectionObserver,
     device::*,
-    nal::Nal, trace_err,
+    nal::Nal, trace_err, util::StrResult,
 };
-use alvr_common::prelude::*;
+//use alvr_common::prelude::*;
 use bytes::Bytes;
 use jni::{
     JavaVM, JNIEnv,
@@ -232,7 +232,7 @@ impl JConnectionObserver {
 
 impl ConnectionObserver for JConnectionObserver {
     fn on_event_occurred(&self, event: ConnectionEvent) -> StrResult {
-        let env = trace_err!(self.vm.attach_current_thread_permanently())?;
+        let mut env = trace_err!(self.vm.attach_current_thread_permanently())?;
         let json_data = trace_err!(serde_json::to_string(&event))?;
         trace_err!(env.call_method(
             &self.object, "onEventOccurred", "(Ljava/lang/String;)V", &[
@@ -259,7 +259,7 @@ impl JDeviceAdapter {
 
 impl DeviceAdapter for JDeviceAdapter {
     fn get_device(&self) -> StrResult<Device> {
-        let env = trace_err!(self.vm.attach_current_thread_permanently())?;
+        let mut env = trace_err!(self.vm.attach_current_thread_permanently())?;
         let ret = trace_err!(env.call_method(
             &self.object,
             "getDeviceSettings",
@@ -277,7 +277,7 @@ impl DeviceAdapter for JDeviceAdapter {
     }
 
     fn get_tracking(&self, frame_index: u64) -> StrResult<Tracking> {
-        let env = trace_err!(self.vm.attach_current_thread_permanently())?;
+        let mut env = trace_err!(self.vm.attach_current_thread_permanently())?;
         let ret = trace_err!(env.call_method(
             &self.object,
             "getTracking",
@@ -359,7 +359,7 @@ impl DeviceAdapter for JDeviceAdapter {
     }
 
     fn on_rendered(&self, frame_index: u64) -> StrResult<()> {
-        let env = trace_err!(self.vm.attach_current_thread_permanently())?;
+        let mut env = trace_err!(self.vm.attach_current_thread_permanently())?;
         trace_err!(env.call_method(
             &self.object,
             "onRendered",

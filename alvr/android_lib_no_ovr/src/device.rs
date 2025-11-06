@@ -2,7 +2,7 @@
 //use alvr_sockets::PrivateIdentity;
 use once_cell::sync::OnceCell;
 
-use crate::trace_err;
+use crate::{trace_err, util::StrResult};
 
 pub type Percentage = u8;
 
