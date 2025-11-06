@@ -1,0 +1,19 @@
+<lint-module
+    format="1"
+    dir="D:\Projects\ALVR_nosix\ALVR\alvr\experiments\android-lib-no-ovr\alvr-android-app-sample"
+    name=":alvr-android-app-sample"
+    type="APP"
+    maven="alvr-android-lib:alvr-android-app-sample:"
+    agpVersion="8.2.2"
+    buildFolder="build"
+    bootClassPath="C:\Users\minim\AppData\Local\Android\Sdk\platforms\android-34\android.jar;C:\Users\minim\AppData\Local\Android\Sdk\build-tools\34.0.0\core-lambda-stubs.jar"
+    javaSourceLevel="1.8"
+    compileTarget="android-34"
+    neverShrinking="true">
+  <lintOptions
+      abortOnError="true"
+      absolutePaths="true"
+      checkReleaseBuilds="true"
+      explainIssues="true"/>
+  <variant name="release"/>
+</lint-module>

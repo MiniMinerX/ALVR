@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="io.github.alvr.android.lib.ConnectionEventDeserializeTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2025-11-06T04:55:29.600Z" hostname="TINMAN" time="0.094">
+  <properties/>
+  <testcase name="testServerFound" classname="io.github.alvr.android.lib.ConnectionEventDeserializeTest" time="0.079"/>
+  <testcase name="testError" classname="io.github.alvr.android.lib.ConnectionEventDeserializeTest" time="0.004"/>
+  <testcase name="testConnectedWithoutFfrParam" classname="io.github.alvr.android.lib.ConnectionEventDeserializeTest" time="0.005"/>
+  <testcase name="testServerRestart" classname="io.github.alvr.android.lib.ConnectionEventDeserializeTest" time="0.001"/>
+  <testcase name="testConnected" classname="io.github.alvr.android.lib.ConnectionEventDeserializeTest" time="0.001"/>
+  <testcase name="testStreamStart" classname="io.github.alvr.android.lib.ConnectionEventDeserializeTest" time="0.0"/>
+  <testcase name="testInitial" classname="io.github.alvr.android.lib.ConnectionEventDeserializeTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

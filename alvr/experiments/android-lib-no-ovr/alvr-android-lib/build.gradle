@@ -1,0 +1,99 @@
+plugins {
+    id 'com.android.library'
+    id 'kotlin-android'
+    id 'org.jetbrains.kotlin.plugin.serialization'
+    id 'org.mozilla.rust-android-gradle.rust-android'
+    id 'maven-publish'
+}
+
+ext {
+    groupId = 'io.github.alvr'
+    versionName = '17.0.0'
+}
+
+group = groupId
+version = versionName
+
+android {
+    namespace 'io.github.alvr.android'  // ADD THIS LINE
+    compileSdk 34  // Update from 31 to 34 for AGP 8.x compatibility
+    ndkVersion "29.0.14206865"  // Update this line to match your installed NDK
+
+    defaultConfig {
+        minSdk 26
+        targetSdk 34  // Update from 31 to 34
+        versionCode 1
+        versionName versionName
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+    
+    // ADD THIS BLOCK to make components available for publishing
+    publishing {
+        singleVariant('release') {
+            withSourcesJar()
+            withJavadocJar()
+        }
+        singleVariant('debug') {
+            withSourcesJar()
+            withJavadocJar()
+        }
+    }
+}
+
+dependencies {
+    api 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.0'
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.4.0'
+    implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.1'
+    implementation 'androidx.core:core-ktx:1.7.0'
+    implementation 'androidx.appcompat:appcompat:1.4.0'
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.3'
+}
+
+cargo {
+    module = ".."
+    libname = "alvr_android"
+    targets = ["arm64", "arm"]
+    targetDirectory = "../../../../target"
+}
+
+tasks.whenTaskAdded { task ->
+    if (task.name.startsWith('javaPreCompile')) {
+        task.dependsOn 'cargoBuild'
+    }
+}
+
+// see: https://developer.android.com/studio/build/maven-publish-plugin?hl=ja
+afterEvaluate {
+    publishing {
+        publications {
+            release(MavenPublication) {
+                from components.release
+                groupId = project.ext.groupId
+                artifactId = project.name
+                version = project.ext.versionName
+            }
+            debug(MavenPublication) {
+                from components.debug
+                groupId = project.ext.groupId
+                artifactId = "${project.name}-debug"
+                version = project.ext.versionName
+            }
+        }
+    }
+}
