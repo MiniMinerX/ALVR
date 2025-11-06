@@ -7,8 +7,7 @@ use crate::{
 //use alvr_common::prelude::*;
 use bytes::Bytes;
 use jni::{
-    JavaVM, JNIEnv,
-    objects::{GlobalRef, JObject, JString, JValue},
+    JNIEnv, JavaVM, objects::{GlobalRef, JObject, JString, JValue, JValueOwned}
 };
 use log::debug;
 use serde_json;
@@ -19,43 +18,44 @@ const BOOLEAN_TYPE: &'static str = "Z";
 const FLOAT_ARRAY_TYPE: &'static str = "[F";
 const STRING_TYPE: &'static str = "Ljava/lang/String;";
 
-fn get_int_field(env: &JNIEnv, object: JObject, field_name: &str) -> i32 {
+fn get_int_field(env: &mut JNIEnv, object: &JObject, field_name: &str) -> i32 {
     match env.get_field(object, field_name, INT_TYPE).unwrap() {
-        JValue::Int(value) => value,
+        JValueOwned::Int(value) => value,
         _ => 0
     }
 }
 
-fn get_float_field(env: &JNIEnv, object: JObject, field_name: &str) -> f32 {
+fn get_float_field(env: &mut JNIEnv, object: &JObject, field_name: &str) -> f32 {
     match env.get_field(object, field_name, FLOAT_TYPE).unwrap() {
-        JValue::Float(value) => value,
+        JValueOwned::Float(value) => value,
         _ => 0.0
     }
 }
 
-fn get_boolean_field(env: &JNIEnv, object: JObject, field_name: &str) -> u8 {
+fn get_boolean_field(env: &mut JNIEnv, object: &JObject, field_name: &str) -> u8 {
     match env.get_field(object, field_name, BOOLEAN_TYPE).unwrap() {
-        JValue::Bool(value) => value,
+        JValueOwned::Bool(value) => value,
         _ => 0
     }
 }
 
-fn get_string_field(env: &JNIEnv, object: JObject, field_name: &str) -> String {
+fn get_string_field(env: &mut JNIEnv, object: &JObject, field_name: &str) -> String {
     match env.get_field(object, field_name, STRING_TYPE).unwrap() {
-        JValue::Object(object) => {
-            env.get_string(JString::from(object)).unwrap().into()
+        JValueOwned::Object(object) => {
+            env.get_string(&JString::from(object)).unwrap().into()
         }
         _ => "".into()
     }
 }
 
-fn get_float_array_field(env: &JNIEnv, object: JObject, field_name: &str) -> Vec<f32> {
+fn get_float_array_field(env: &JNIEnv, object: &JObject, field_name: &str) -> Vec<f32> {
     match env.get_field(object, field_name, FLOAT_ARRAY_TYPE).unwrap() {
-        JValue::Object(object) => {
-            let length = env.get_array_length(*object).unwrap();
+        JValueOwned::Object(object) => {
+            let array = jni::objects::JPrimitiveArray::from(object);
+            let length = env.get_array_length(&array).unwrap();
             let mut buffer = vec![0.0f32; length as usize];
             env.get_float_array_region(
-                *object,
+                array,
                 0,
                 buffer.as_mut_slice(),
             ).unwrap();
@@ -78,39 +78,39 @@ impl<'a> Preferences<'a> {
         }
     }
 
-    pub fn is_empty(&self) -> bool {
+    pub fn is_empty(&mut self) -> bool {
         self.get_hostname().is_empty() ||
             self.get_certificate_pem().is_empty() ||
             self.get_key_pem().is_empty()
     }
 
-    pub fn set_hostname(&self, value: &str) {
+    pub fn set_hostname(&mut self, value: &str) {
         self.set_string_field("hostname", value)
     }
 
-    pub fn get_hostname(&self) -> String {
-        get_string_field(&self.env, self.object, "hostname")
+    pub fn get_hostname(&mut self) -> String {
+        get_string_field(&mut self.env, &self.object, "hostname")
     }
 
-    pub fn set_certificate_pem(&self, value: &str) {
+    pub fn set_certificate_pem(&mut self, value: &str) {
         self.set_string_field("certificate_pem", value)
     }
 
-    pub fn get_certificate_pem(&self) -> String {
-        get_string_field(&self.env, self.object, "certificate_pem")
+    pub fn get_certificate_pem(&mut self) -> String {
+        get_string_field(&mut self.env, &self.object, "certificate_pem")
     }
 
-    pub fn set_key_pem(&self, value: &str) {
+    pub fn set_key_pem(&mut self, value: &str) {
         self.set_string_field("key_pem", value)
     }
 
-    pub fn get_key_pem(&self) -> String {
-        get_string_field(&self.env, self.object, "key_pem")
+    pub fn get_key_pem(&mut self) -> String {
+        get_string_field(&mut self.env, &self.object, "key_pem")
     }
 
-    fn set_string_field(&self, field_name: &str, value: &str) {
+    fn set_string_field(&mut self, field_name: &str, value: &str) {
         let j_string = self.env.new_string(value).unwrap();
-        self.env.set_field(self.object, field_name, STRING_TYPE, j_string.into()).unwrap()
+        self.env.set_field(&self.object, field_name, STRING_TYPE, (&j_string).into()).unwrap()
     }
 }
 
@@ -127,29 +127,29 @@ impl<'a> JDeviceSettings<'a> {
         }
     }
 
-    pub fn get_name(&self) -> String {
-        get_string_field(&self.env, self.object, "name")
+    pub fn get_name(&mut self) -> String {
+        get_string_field(&mut self.env, &self.object, "name")
     }
 
-    pub fn get_recommended_eye_width(&self) -> u32 {
-        get_int_field(&self.env, self.object, "recommendedEyeWidth") as u32
+    pub fn get_recommended_eye_width(&mut self) -> u32 {
+        get_int_field(&mut self.env, &self.object, "recommendedEyeWidth") as u32
     }
 
-    pub fn get_recommended_eye_height(&self) -> u32 {
-        get_int_field(&self.env, self.object, "recommendedEyeHeight") as u32
+    pub fn get_recommended_eye_height(&mut self) -> u32 {
+        get_int_field(&mut self.env, &self.object, "recommendedEyeHeight") as u32
     }
 
-    pub fn get_available_refresh_rates(&self) -> Vec<f32> {
-        get_float_array_field(&self.env, self.object, "availableRefreshRates")
+    pub fn get_available_refresh_rates(&mut self) -> Vec<f32> {
+        get_float_array_field(&mut self.env, &self.object, "availableRefreshRates")
     }
 
-    pub fn get_preferred_refresh_rate(&self) -> f32 {
-        get_float_field(&self.env, self.object, "preferredRefreshRate")
+    pub fn get_preferred_refresh_rate(&mut self) -> f32 {
+        get_float_field(&mut self.env, &self.object, "preferredRefreshRate")
     }
 }
 
 impl From<JDeviceSettings<'_>> for Device {
-    fn from(settings: JDeviceSettings) -> Self {
+    fn from(mut settings: JDeviceSettings) -> Self {
         Device {
             name: settings.get_name(),
             recommended_eye_width: settings.get_recommended_eye_width(),
@@ -175,7 +175,7 @@ impl InputBuffer {
         })
     }
 
-    pub fn queue_config(&self, env: &JNIEnv, nal: Nal) -> StrResult {
+    pub fn queue_config(&self, env: &mut JNIEnv, nal: Nal) -> StrResult {
         debug!(
             "queue_config {:?} frame_len={} frame_index={}",
             nal.nal_type, nal.frame_buffer.len(), nal.frame_index
@@ -187,7 +187,7 @@ impl InputBuffer {
         Ok(())
     }
 
-    pub fn queue(&self, env: &JNIEnv, nal: Nal) -> StrResult {
+    pub fn queue(&self, env: &mut JNIEnv, nal: Nal) -> StrResult {
         debug!(
             "queue {:?} frame_len={} frame_index={}",
             nal.nal_type, nal.frame_buffer.len(), nal.frame_index
@@ -203,8 +203,8 @@ impl InputBuffer {
         let ret_value = trace_err!(env.call_method(
             &self.object, "getBuffer", "()Ljava/nio/ByteBuffer;", &[]
         )).unwrap();
-        if let JValue::Object(byte_buffer) = ret_value {
-            let buffer = trace_err!(env.get_direct_buffer_address(byte_buffer.into())).unwrap();
+        if let JValueOwned::Object(byte_buffer) = ret_value {
+            let buffer = trace_err!(env.get_direct_buffer_address((&byte_buffer).into())).unwrap();
             buffer[..frame_buffer.len()].copy_from_slice(&frame_buffer);
             trace_err!(env.call_method(
                 byte_buffer, "position", "(I)Ljava/nio/Buffer;",
@@ -236,7 +236,7 @@ impl ConnectionObserver for JConnectionObserver {
         let json_data = trace_err!(serde_json::to_string(&event))?;
         trace_err!(env.call_method(
             &self.object, "onEventOccurred", "(Ljava/lang/String;)V", &[
-                trace_err!(env.new_string(json_data))?.into()
+                (&trace_err!(env.new_string(json_data))?).into()
             ]
         ))?;
         Ok(())
@@ -266,7 +266,7 @@ impl DeviceAdapter for JDeviceAdapter {
             "()Lio/github/alvr/android/lib/DeviceSettings;",
             &[]
         ))?;
-        let device_settings = JDeviceSettings::new(env, ret.l().unwrap());
+        let mut device_settings = JDeviceSettings::new(env, ret.l().unwrap());
         Ok(Device {
             name: device_settings.get_name(),
             recommended_eye_width: device_settings.get_recommended_eye_width(),
@@ -286,7 +286,7 @@ impl DeviceAdapter for JDeviceAdapter {
                 (frame_index as i64).into()
             ]
         ))?;
-        let tracking = JTracking::new(env, ret.l().unwrap());
+        let mut tracking = JTracking::new(env, ret.l().unwrap());
         let eye_fov = tracking.get_eye_fov();
         let head_pose = tracking.get_head_pose();
         Ok(Tracking {
@@ -385,29 +385,29 @@ impl<'a> JTracking<'a> {
         }
     }
 
-    pub fn get_ipd(&self) -> f32 {
-        get_float_field(&self.env, self.object, "ipd")
+    pub fn get_ipd(&mut self) -> f32 {
+        get_float_field(&mut self.env, &self.object, "ipd")
     }
 
-    pub fn get_battery(&self) -> Percentage {
-        get_int_field(&self.env, self.object, "battery") as Percentage
+    pub fn get_battery(&mut self) -> Percentage {
+        get_int_field(&mut self.env, &self.object, "battery") as Percentage
     }
 
-    pub fn get_plugged(&self) -> u8 {
-        get_boolean_field(&self.env, self.object, "plugged")
+    pub fn get_plugged(&mut self) -> u8 {
+        get_boolean_field(&mut self.env, &self.object, "plugged")
     }
 
-    pub fn get_mounted(&self) -> u8 {
-        get_boolean_field(&self.env, self.object, "mounted")
+    pub fn get_mounted(&mut self) -> u8 {
+        get_boolean_field(&mut self.env, &self.object, "mounted")
     }
 
     /// (l.left, l.right, l.top, l.bottom, r.left, r.right, r.top, r.bottom)
-    pub fn get_eye_fov(&self) -> Vec<f32> {
-        get_float_array_field(&self.env, self.object, "eyeFov")
+    pub fn get_eye_fov(&mut self) -> Vec<f32> {
+        get_float_array_field(&mut self.env, &self.object, "eyeFov")
     }
 
     /// (o.x, o.y, o.z, o.w, p.x, p.y, p.z)
-    pub fn get_head_pose(&self) -> Vec<f32> {
-        get_float_array_field(&self.env, self.object, "headPose")
+    pub fn get_head_pose(&mut self) -> Vec<f32> {
+        get_float_array_field(&mut self.env, &self.object, "headPose")
     }
 }

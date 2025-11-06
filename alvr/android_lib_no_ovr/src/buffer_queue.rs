@@ -83,19 +83,19 @@ pub fn buffer_coordination_loop() -> task::JoinHandle<StrResult> {
             push_input_buffer(waiting_buffer)?;
         }
 
-        if let Some(env) = maybe_env {
+        if let Some(mut env) = maybe_env {
             loop {
                 let input_buffer = trace_err!(input_buffer_receiver.recv())?;
                 let nal = trace_err!(nal_receiver.recv())?;
 
                 if nal.nal_type == NalType::Sps {
-                    input_buffer.queue_config(&env, nal)?;
+                    input_buffer.queue_config(&mut env, nal)?;
                 } else {
                     if nal.nal_type == NalType::Idr {
                         IDR_PARSED.store(true, Ordering::Relaxed);
                     }
                     latency_controller::decoder_input(nal.frame_index);
-                    input_buffer.queue(&env, nal)?;
+                    input_buffer.queue(&mut env, nal)?;
                 }
             }
         } else {

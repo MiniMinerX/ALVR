@@ -7,9 +7,8 @@ use std::{
     collections::VecDeque,
     future,
     mem,
-    sync::Arc,
-    sync::mpsc as smpsc,
-    thread,
+    sync::{Arc, mpsc as smpsc},
+    thread, time::Duration,
 };
 use tokio::sync::mpsc as tmpsc;
 
@@ -22,7 +21,8 @@ pub async fn play_audio_loop_nop(
     mut game_audio_receiver: StreamReceiver<()>,
 ) -> StrResult {
     loop {
-        game_audio_receiver.recv().await?;
+        // 1 second timeout
+        game_audio_receiver.recv(Duration::new(1,0));
     }
 }
 

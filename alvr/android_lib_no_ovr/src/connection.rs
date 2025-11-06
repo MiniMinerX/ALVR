@@ -8,6 +8,7 @@ use alvr_common::{
     glam::{Quat, Vec2, Vec3},
     ALVR_NAME, ALVR_VERSION,
 };
+use alvr_packets::{ClientControlPacket, ServerControlPacket};
 use alvr_session::*;
 use alvr_sockets::*;
 use bincode;
