@@ -69,9 +69,10 @@ impl FecQueue {
         let fec_index = header.fec_index as usize;
 
         if self.current_frame.video_frame_index != header.video_frame_index {
-            if self.current_frame.tracking_frame_index == header.tracking_frame_index {
+            let header_tracking_frame_index = header.tracking_frame_index;
+            if self.current_frame.tracking_frame_index == header_tracking_frame_index {
                 // FIXME This causes problems with latency_controller
-                warn!("tracking_frame_index has not been changed. ({})", header.tracking_frame_index);
+                warn!("tracking_frame_index has not been changed. ({})", header_tracking_frame_index);
             }
             // Check previous frame
             if !self.recovered {
@@ -299,18 +300,22 @@ impl FecQueue {
     }
 
     fn debug(&self) {
+        let video_frame_index = self.current_frame.video_frame_index;
+        let frame_byte_size = self.current_frame.frame_byte_size;
+        let fec_percentage = self.current_frame.fec_percentage;
+        let packet_counter = self.current_frame.packet_counter;
         debug!(
             "video_frame_index={} shards={}:{} frame_byte_size={} fec_percentage={} total_shards={} shard_packets={} block_size={} first_packet_of_next_frame={} current_packet={}",
-            self.current_frame.video_frame_index,
+            video_frame_index,
             self.total_data_shards,
             self.total_parity_shards,
-            self.current_frame.frame_byte_size,
-            self.current_frame.fec_percentage,
+            frame_byte_size,
+            fec_percentage,
             self.total_shards,
             self.shard_packets,
             self.block_size,
             self.first_packet_of_next_frame,
-            self.current_frame.packet_counter
+            packet_counter
         );
         for i in 0..self.shard_packets {
             debug!(

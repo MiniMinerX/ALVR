@@ -16,7 +16,7 @@ version = versionName
 
 android {
     compileSdk 31
-    ndkVersion "22.0.7026061"
+    ndkVersion "23.2.8568313"
 
     defaultConfig {
         minSdk 26
@@ -57,6 +57,13 @@ cargo {
     libname = "alvr_android"
     targets = ["arm64", "arm"]
     targetDirectory = "../../../../target"
+    // NDK r23+ removed arm-linux-androideabi-ar; use llvm-ar instead
+    exec = { spec, toolchain ->
+        def llvmAr = new File(android.ndkDirectory, "toolchains/llvm/prebuilt/windows-x86_64/bin/llvm-ar.exe")
+        spec.environment("AR_armv7-linux-androideabi", llvmAr.absolutePath)
+        spec.environment("AR_armv7_linux_androideabi", llvmAr.absolutePath)
+        spec.environment("AR_aarch64-linux-android", llvmAr.absolutePath)
+    }
 }
 
 tasks.whenTaskAdded { task ->
