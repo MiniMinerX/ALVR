@@ -1,0 +1,13 @@
+[target.aarch64-linux-android]
+rustflags = [
+    "-C", "link-arg=-Wl,--no-as-needed",
+    "-C", "link-arg=-lc++_shared",
+    "-C", "link-arg=-Wl,--as-needed",
+]
+
+[target.armv7-linux-androideabi]
+rustflags = [
+    "-C", "link-arg=-Wl,--no-as-needed",
+    "-C", "link-arg=-lc++_shared",
+    "-C", "link-arg=-Wl,--as-needed",
+]

@@ -4,6 +4,7 @@ class NativeApi {
 
     companion object {
         init {
+            System.loadLibrary("c++_shared")
             System.loadLibrary("alvr_android")
         }
     }

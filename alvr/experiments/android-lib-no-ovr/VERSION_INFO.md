@@ -9,7 +9,7 @@
 - Android Gradle Plugin: `7.0.3`
 - Kotlin: `1.6.0`
 - Android SDK: 31 (min: 26, target: 31)
-- NDK: `23.2.8568313`
+- NDK: `27.2.12479018`
 - Java: 8 (compatible with 8-16)
 - JDK: 16 (tested)
 

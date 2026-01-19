@@ -65,6 +65,7 @@ class UnityPlugin(activity: Activity) : LifecycleOwner {
         private val TAG = UnityPlugin::class.simpleName
 
         init {
+            System.loadLibrary("c++_shared")
             System.loadLibrary("alvr_android")
         }
     }

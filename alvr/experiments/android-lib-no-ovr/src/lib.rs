@@ -14,6 +14,19 @@ mod packet;
 mod unity;
 mod util;
 
+// Force DT_NEEDED on libc++_shared.so so Unity can load libalvr_android.so
+// even when it is loaded by native code before Java runs.
+#[cfg(target_os = "android")]
+mod cxx_link {
+    #[link(name = "c++_shared")]
+    extern "C" {
+        fn __cxa_pure_virtual();
+    }
+
+    #[used]
+    static FORCE_CXX_LINK: unsafe extern "C" fn() = __cxa_pure_virtual;
+}
+
 use crate::jvm::{
     InputBuffer,
     JConnectionObserver, JDeviceAdapter,

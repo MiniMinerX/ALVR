@@ -43,7 +43,7 @@ pub extern "system" fn Java_io_github_alvr_android_lib_UnityPlugin_attach(
 }
 
 #[no_mangle]
-extern "system" fn GetInitContextEventFunc() -> *const i32 {
+pub extern "C" fn GetInitContextEventFunc() -> *const i32 {
     init_context as *const i32
 }
 
@@ -56,7 +56,7 @@ fn init_context(_event_id: i32) {
 }
 
 #[no_mangle]
-extern "system" fn SetDeviceAdapter(
+pub extern "C" fn SetDeviceAdapter(
     get_device_settings: extern fn() -> &'static UniDeviceSettings,
     get_tracking: extern fn(i64) -> &'static Tracking,
     on_rendered: extern fn(i64) -> (),

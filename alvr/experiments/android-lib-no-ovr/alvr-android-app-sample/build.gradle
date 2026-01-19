@@ -4,8 +4,9 @@ plugins {
 }
 
 android {
+    namespace "io.github.alvr.android.app"
     compileSdk 31
-    ndkVersion "22.0.7026061"
+    ndkVersion "27.2.12479018"
 
     defaultConfig {
         applicationId "io.github.alvr.android.app"
